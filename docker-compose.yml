@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+
+  gateway:
+    build:
+      context: ./../gateway
+      dockerfile: ../gateway/gateway.dockerfile
+    restart: always
+    ports:
+      - "8080:80"
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+#      BROKER_SERVICE_URL: "http://broker-service:80"
+#      AUTHENTICATION_SERVICE_URL: "http://authentication-service:80"
+#      LISTENER_SERVICE_URL: "http://listener-service:80"
+      LOG_SERVICE_URL: "http://log-service"
+#      MAILER_SERVICE_URL: "http://mailer-service:80"
+
+  log-service:
+    build:
+      context: ./../log-service
+      dockerfile: ./../log-service/log-service.dockerfile
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mongo:
+    image: 'mongo:latest'
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: logs
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - ./db-data/mongo/:/data/db
+
+#  mailhog:
+#    image: 'mailhog/mailhog:latest'
+#    ports:
+#      - "1025:1025"
+#      - "8025:8025"
