@@ -12,12 +12,8 @@ services:
     deploy:
       mode: replicated
       replicas: 1
-    environment:
-#      BROKER_SERVICE_URL: "http://broker-service:80"
-#      AUTHENTICATION_SERVICE_URL: "http://authentication-service:80"
-#      LISTENER_SERVICE_URL: "http://listener-service:80"
-      LOG_SERVICE_URL: "http://log-service"
-#      MAILER_SERVICE_URL: "http://mailer-service:80"
+    env_file:
+      - .env
 
   log-service:
     build:
@@ -27,15 +23,42 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+    ports:
+      - "50001:50001"
+    env_file:
+      - .env
+
+  post-service:
+    build:
+      context: ./../post-service
+      dockerfile: ./../post-service/post-service.dockerfile
+    restart: always
+    ports:
+      - "50002:50002"
+    deploy:
+      mode: replicated
+      replicas: 1
+    env_file:
+      - .env
+
+  comment-service:
+    build:
+      context: ./../comment-service
+      dockerfile: ./../comment-service/comment-service.dockerfile
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    env_file:
+      - .env
 
   mongo:
     image: 'mongo:latest'
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_DATABASE: logs
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     volumes:
       - ./db-data/mongo/:/data/db
 
